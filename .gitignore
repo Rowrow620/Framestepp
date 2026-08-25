@@ -1,0 +1,11 @@
+/build/
+/out/
+/.cache/
+/.vs/
+/.idea/
+/.vscode/
+CMakeUserPresets.json
+compile_commands.json
+*.user
+*.profraw
+.DS_Store

@@ -1,0 +1,85 @@
+name: CI
+
+"on":
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  format:
+    name: Formatting
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check C++ formatting
+        run: >-
+          find app include src tests -type f
+          \( -name '*.cpp' -o -name '*.hpp' \) -print0 |
+          xargs -0 clang-format --dry-run --Werror
+
+  build-and-test:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: GCC
+            os: ubuntu-latest
+            cc: gcc
+            cxx: g++
+          - name: Clang
+            os: ubuntu-latest
+            cc: clang
+            cxx: clang++
+          - name: MSVC
+            os: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        if: runner.os != 'Windows'
+        env:
+          CC: ${{ matrix.cc }}
+          CXX: ${{ matrix.cxx }}
+        run: >-
+          cmake -S . -B build
+          -DCMAKE_BUILD_TYPE=Debug
+          -DFRAMESTEPP_WARNINGS_AS_ERRORS=ON
+
+      - name: Configure
+        if: runner.os == 'Windows'
+        run: >-
+          cmake -S . -B build -A x64
+          -DFRAMESTEPP_WARNINGS_AS_ERRORS=ON
+
+      - name: Build
+        run: cmake --build build --config Debug --parallel
+
+      - name: Test
+        run: ctest --test-dir build -C Debug --output-on-failure
+
+  sanitizers:
+    name: Clang sanitizers
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        env:
+          CC: clang
+          CXX: clang++
+        run: cmake --preset sanitize
+
+      - name: Build
+        run: cmake --build --preset sanitize --parallel
+
+      - name: Test
+        run: ctest --preset sanitize
