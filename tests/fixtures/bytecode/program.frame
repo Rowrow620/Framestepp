@@ -1,0 +1,7 @@
+fn countdown(turns: Int) -> String {
+    if turns == 0 { "go" } else { countdown(turns - 1) }
+}
+
+let mut message: String = framein();
+message = countdown(3);
+frameout(message);

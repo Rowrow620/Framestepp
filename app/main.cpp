@@ -1,10 +1,13 @@
 #include "framestepp/ast.hpp"
+#include "framestepp/bytecode.hpp"
+#include "framestepp/compiler.hpp"
 #include "framestepp/diagnostic.hpp"
 #include "framestepp/lexer.hpp"
 #include "framestepp/parser.hpp"
 #include "framestepp/source.hpp"
 #include "framestepp/token.hpp"
 #include "framestepp/type_checker.hpp"
+#include "framestepp/verifier.hpp"
 
 #include <filesystem>
 #include <fstream>
@@ -24,11 +27,12 @@ using SourceResult = std::variant<framestepp::SourceFile, std::string>;
 void print_help(std::ostream& output) {
     output << "FrameStep++\n\n"
               "Usage:\n"
-              "  framestepp lex <FILE>    Print the source token stream\n"
-              "  framestepp parse <FILE>  Parse and print the syntax tree\n"
-              "  framestepp check <FILE>  Validate a program's types\n"
-              "  framestepp --version     Print version information\n"
-              "  framestepp --help        Print this help\n";
+              "  framestepp lex <FILE>          Print the source token stream\n"
+              "  framestepp parse <FILE>        Parse and print the syntax tree\n"
+              "  framestepp check <FILE>        Validate a program's types\n"
+              "  framestepp disassemble <FILE>  Print verified bytecode\n"
+              "  framestepp --version           Print version information\n"
+              "  framestepp --help              Print this help\n";
 }
 
 [[nodiscard]] SourceResult read_source(const std::string_view path_text) {
@@ -106,6 +110,27 @@ int check_file(const framestepp::SourceFile& source) {
     return 0;
 }
 
+int disassemble_file(const framestepp::SourceFile& source) {
+    auto program = parse_source(source);
+    if (!program.has_value()) {
+        return 1;
+    }
+
+    auto compile_result = framestepp::Compiler{}.compile(*program);
+    if (const auto* diagnostic = std::get_if<framestepp::Diagnostic>(&compile_result)) {
+        return report_diagnostic(source, *diagnostic);
+    }
+
+    auto module = std::move(std::get<framestepp::BytecodeModule>(compile_result));
+    auto verification = framestepp::BytecodeVerifier{}.verify(module);
+    if (const auto* diagnostic = std::get_if<framestepp::Diagnostic>(&verification)) {
+        return report_diagnostic(source, *diagnostic);
+    }
+
+    std::cout << framestepp::format_bytecode(module);
+    return 0;
+}
+
 } // namespace
 
 int main(const int argument_count, char* arguments[]) {
@@ -124,7 +149,8 @@ int main(const int argument_count, char* arguments[]) {
         return 0;
     }
 
-    if (argument_count != 3 || (command != "lex" && command != "parse" && command != "check")) {
+    if (argument_count != 3 || (command != "lex" && command != "parse" && command != "check" &&
+                                command != "disassemble")) {
         std::cerr << "error: invalid arguments\n\n"
                      "Run `framestepp --help` for usage.\n";
         return 1;
@@ -143,5 +169,8 @@ int main(const int argument_count, char* arguments[]) {
     if (command == "parse") {
         return parse_file(source);
     }
-    return check_file(source);
+    if (command == "check") {
+        return check_file(source);
+    }
+    return disassemble_file(source);
 }

@@ -1,0 +1,41 @@
+== constants ==
+0000 Integer 0
+0001 String "go"
+0002 Integer 1
+0003 Integer 3
+== globals ==
+0000 mut message @ [97, 133)
+== main ==
+0000 LOAD framein             @ [123, 130)
+0001 CALL 0                   @ [123, 132)
+0002 INITIALIZE_GLOBAL 0000   @ [105, 112)
+0003 LOAD countdown           @ [144, 153)
+0004 CONSTANT 0003            @ [154, 155)
+0005 CALL 1                   @ [144, 156)
+0006 ASSIGN message           @ [142, 143)
+0007 POP                      @ [134, 156)
+0008 LOAD frameout            @ [158, 166)
+0009 LOAD message             @ [167, 174)
+0010 CALL 1                   @ [158, 175)
+0011 POP                      @ [158, 175)
+0012 UNIT                     @ [0, 177)
+0013 RETURN                   @ [0, 177)
+== function 0000 countdown(turns: Int) -> String @ [0, 95) ==
+0000 ENTER_SCOPE              @ [35, 95)
+0001 LOAD turns               @ [44, 49)
+0002 CONSTANT 0000            @ [53, 54)
+0003 EQUAL                    @ [50, 52)
+0004 JUMP_IF_FALSE 0009       @ [44, 54)
+0005 ENTER_SCOPE              @ [55, 63)
+0006 CONSTANT 0001            @ [57, 61)
+0007 EXIT_SCOPE               @ [55, 63)
+0008 JUMP 0016                @ [41, 93)
+0009 ENTER_SCOPE              @ [69, 93)
+0010 LOAD countdown           @ [71, 80)
+0011 LOAD turns               @ [81, 86)
+0012 CONSTANT 0002            @ [89, 90)
+0013 SUBTRACT                 @ [87, 88)
+0014 CALL 1                   @ [71, 91)
+0015 EXIT_SCOPE               @ [69, 93)
+0016 EXIT_SCOPE               @ [35, 95)
+0017 RETURN                   @ [35, 95)

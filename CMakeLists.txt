@@ -34,6 +34,8 @@ endfunction()
 
 add_library(framestepp_core STATIC
     src/ast.cpp
+    src/bytecode.cpp
+    src/compiler.cpp
     src/diagnostic.cpp
     src/lexer.cpp
     src/parser.cpp
@@ -42,6 +44,7 @@ add_library(framestepp_core STATIC
     src/type.cpp
     src/type_checker.cpp
     src/utf8.hpp
+    src/verifier.cpp
 )
 add_library(FrameStepPP::core ALIAS framestepp_core)
 
@@ -72,10 +75,13 @@ if(BUILD_TESTING)
     FetchContent_MakeAvailable(googletest)
 
     add_executable(framestepp_tests
+        tests/bytecode_test.cpp
+        tests/compiler_test.cpp
         tests/lexer_test.cpp
         tests/parser_test.cpp
         tests/source_diagnostic_test.cpp
         tests/type_checker_test.cpp
+        tests/verifier_test.cpp
     )
     target_link_libraries(framestepp_tests PRIVATE FrameStepPP::core GTest::gtest_main)
     framestepp_configure_target(framestepp_tests)
@@ -101,6 +107,19 @@ if(BUILD_TESTING)
     )
     set_tests_properties(CliCheckValidFixture PROPERTIES PASS_REGULAR_EXPRESSION "type check passed")
 
+    add_test(NAME CliHelpIncludesDisassemble COMMAND framestepp --help)
+    set_tests_properties(CliHelpIncludesDisassemble PROPERTIES
+                         PASS_REGULAR_EXPRESSION "framestepp disassemble <FILE>")
+
+    add_test(
+        NAME CliDisassembleFixture
+        COMMAND "${CMAKE_COMMAND}"
+                "-DFRAMESTEPP_EXECUTABLE=$<TARGET_FILE:framestepp>"
+                "-DSOURCE_FILE=${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/bytecode/program.frame"
+                "-DEXPECTED_FILE=${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/bytecode/program.expected"
+                -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/expect_disassembly.cmake"
+    )
+
     add_test(
         NAME CliRejectsTypeMismatch
         COMMAND "${CMAKE_COMMAND}"
@@ -120,6 +139,18 @@ if(BUILD_TESTING)
                 "-DEXPECTED_MESSAGE=global initializers cannot call user-defined functions"
                 "-DEXPECTED_LOCATION=:1:19"
                 "-DEXPECTED_CARET=^^^^"
+                -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/expect_check_failure.cmake"
+    )
+
+    add_test(
+        NAME CliDisassembleRejectsTypeMismatch
+        COMMAND "${CMAKE_COMMAND}"
+                "-DFRAMESTEPP_EXECUTABLE=$<TARGET_FILE:framestepp>"
+                "-DCOMMAND_NAME=disassemble"
+                "-DSOURCE_FILE=${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/type_check/type_mismatch.frame"
+                "-DEXPECTED_MESSAGE=variable `score` expects Int, found String"
+                "-DEXPECTED_LOCATION=:1:18"
+                "-DEXPECTED_CARET=^^^^^^^^^^^"
                 -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/expect_check_failure.cmake"
     )
 endif()

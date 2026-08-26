@@ -5,8 +5,12 @@ foreach(required_variable IN ITEMS FRAMESTEPP_EXECUTABLE SOURCE_FILE EXPECTED_ME
     endif()
 endforeach()
 
+if(NOT DEFINED COMMAND_NAME)
+    set(COMMAND_NAME check)
+endif()
+
 execute_process(
-    COMMAND "${FRAMESTEPP_EXECUTABLE}" check "${SOURCE_FILE}"
+    COMMAND "${FRAMESTEPP_EXECUTABLE}" "${COMMAND_NAME}" "${SOURCE_FILE}"
     RESULT_VARIABLE check_result
     OUTPUT_VARIABLE check_stdout
     ERROR_VARIABLE check_stderr
@@ -14,6 +18,9 @@ execute_process(
 )
 
 set(check_output "${check_stdout}${check_stderr}")
+if(NOT check_stdout STREQUAL "")
+    message(FATAL_ERROR "expected empty stdout\n${check_stdout}")
+endif()
 if(NOT check_result STREQUAL "1")
     message(FATAL_ERROR "expected exit code 1, got '${check_result}'\n${check_output}")
 endif()
