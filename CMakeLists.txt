@@ -39,6 +39,8 @@ add_library(framestepp_core STATIC
     src/parser.cpp
     src/source.cpp
     src/token.cpp
+    src/type.cpp
+    src/type_checker.cpp
     src/utf8.hpp
 )
 add_library(FrameStepPP::core ALIAS framestepp_core)
@@ -73,6 +75,7 @@ if(BUILD_TESTING)
         tests/lexer_test.cpp
         tests/parser_test.cpp
         tests/source_diagnostic_test.cpp
+        tests/type_checker_test.cpp
     )
     target_link_libraries(framestepp_tests PRIVATE FrameStepPP::core GTest::gtest_main)
     framestepp_configure_target(framestepp_tests)
@@ -91,4 +94,32 @@ if(BUILD_TESTING)
         COMMAND framestepp parse "${CMAKE_CURRENT_SOURCE_DIR}/examples/hello.frame"
     )
     set_tests_properties(CliParseExample PROPERTIES PASS_REGULAR_EXPRESSION "Program")
+
+    add_test(
+        NAME CliCheckValidFixture
+        COMMAND framestepp check "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/type_check/valid.frame"
+    )
+    set_tests_properties(CliCheckValidFixture PROPERTIES PASS_REGULAR_EXPRESSION "type check passed")
+
+    add_test(
+        NAME CliRejectsTypeMismatch
+        COMMAND "${CMAKE_COMMAND}"
+                "-DFRAMESTEPP_EXECUTABLE=$<TARGET_FILE:framestepp>"
+                "-DSOURCE_FILE=${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/type_check/type_mismatch.frame"
+                "-DEXPECTED_MESSAGE=variable `score` expects Int, found String"
+                "-DEXPECTED_LOCATION=:1:18"
+                "-DEXPECTED_CARET=^^^^^^^^^^^"
+                -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/expect_check_failure.cmake"
+    )
+
+    add_test(
+        NAME CliRejectsUnsafeGlobalInitializer
+        COMMAND "${CMAKE_COMMAND}"
+                "-DFRAMESTEPP_EXECUTABLE=$<TARGET_FILE:framestepp>"
+                "-DSOURCE_FILE=${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/type_check/unsafe_global_initializer.frame"
+                "-DEXPECTED_MESSAGE=global initializers cannot call user-defined functions"
+                "-DEXPECTED_LOCATION=:1:19"
+                "-DEXPECTED_CARET=^^^^"
+                -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/expect_check_failure.cmake"
+    )
 endif()

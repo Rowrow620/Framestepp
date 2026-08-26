@@ -1,0 +1,5 @@
+let answer: Int = read();
+
+fn read() -> Int {
+    42
+}

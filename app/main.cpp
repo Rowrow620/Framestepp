@@ -4,11 +4,13 @@
 #include "framestepp/parser.hpp"
 #include "framestepp/source.hpp"
 #include "framestepp/token.hpp"
+#include "framestepp/type_checker.hpp"
 
 #include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <iterator>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -24,6 +26,7 @@ void print_help(std::ostream& output) {
               "Usage:\n"
               "  framestepp lex <FILE>    Print the source token stream\n"
               "  framestepp parse <FILE>  Parse and print the syntax tree\n"
+              "  framestepp check <FILE>  Validate a program's types\n"
               "  framestepp --version     Print version information\n"
               "  framestepp --help        Print this help\n";
 }
@@ -61,19 +64,45 @@ int lex_file(const framestepp::SourceFile& source) {
     return 0;
 }
 
-int parse_file(const framestepp::SourceFile& source) {
+[[nodiscard]] std::optional<framestepp::Program>
+parse_source(const framestepp::SourceFile& source) {
     auto lex_result = framestepp::Lexer{source}.lex();
     if (const auto* diagnostic = std::get_if<framestepp::Diagnostic>(&lex_result)) {
-        return report_diagnostic(source, *diagnostic);
+        report_diagnostic(source, *diagnostic);
+        return std::nullopt;
     }
 
     auto tokens = std::move(std::get<std::vector<framestepp::Token>>(lex_result));
     auto parse_result = framestepp::Parser{std::move(tokens)}.parse();
     if (const auto* diagnostic = std::get_if<framestepp::Diagnostic>(&parse_result)) {
+        report_diagnostic(source, *diagnostic);
+        return std::nullopt;
+    }
+
+    return std::move(std::get<framestepp::Program>(parse_result));
+}
+
+int parse_file(const framestepp::SourceFile& source) {
+    auto program = parse_source(source);
+    if (!program.has_value()) {
+        return 1;
+    }
+
+    std::cout << framestepp::format_ast(*program);
+    return 0;
+}
+
+int check_file(const framestepp::SourceFile& source) {
+    auto program = parse_source(source);
+    if (!program.has_value()) {
+        return 1;
+    }
+
+    if (auto diagnostic = framestepp::TypeChecker{}.check(*program)) {
         return report_diagnostic(source, *diagnostic);
     }
 
-    std::cout << framestepp::format_ast(std::get<framestepp::Program>(parse_result));
+    std::cout << "type check passed\n";
     return 0;
 }
 
@@ -95,7 +124,7 @@ int main(const int argument_count, char* arguments[]) {
         return 0;
     }
 
-    if (argument_count != 3 || (command != "lex" && command != "parse")) {
+    if (argument_count != 3 || (command != "lex" && command != "parse" && command != "check")) {
         std::cerr << "error: invalid arguments\n\n"
                      "Run `framestepp --help` for usage.\n";
         return 1;
@@ -108,5 +137,11 @@ int main(const int argument_count, char* arguments[]) {
     }
 
     const auto& source = std::get<framestepp::SourceFile>(source_result);
-    return command == "lex" ? lex_file(source) : parse_file(source);
+    if (command == "lex") {
+        return lex_file(source);
+    }
+    if (command == "parse") {
+        return parse_file(source);
+    }
+    return check_file(source);
 }
