@@ -1,0 +1,5 @@
+error: integer overflow while evaluating `+`
+ --> SOURCE_FILE_PLACEHOLDER:1:27
+  |
+1 | print(9223372036854775807 + 1);
+  |                           ^

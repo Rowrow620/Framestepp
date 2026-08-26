@@ -1,0 +1,5 @@
+error: expected an expression, found `;`
+ --> SOURCE_FILE_PLACEHOLDER:1:13
+  |
+1 | let score = ;
+  |             ^

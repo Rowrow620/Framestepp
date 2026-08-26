@@ -1,0 +1,5 @@
+error: variable `score` expects Int, found String
+ --> SOURCE_FILE_PLACEHOLDER:1:18
+  |
+1 | let score: Int = "forty-two";
+  |                  ^^^^^^^^^^^

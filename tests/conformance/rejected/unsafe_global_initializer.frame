@@ -1,0 +1,7 @@
+let answer: Int = read();
+
+fn read() -> Int {
+    answer
+}
+
+print(answer);

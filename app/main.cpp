@@ -21,6 +21,10 @@
 #include <variant>
 #include <vector>
 
+#ifndef FRAMESTEPP_VERSION
+#error "FRAMESTEPP_VERSION must be defined by the build system"
+#endif
+
 namespace {
 
 using SourceResult = std::variant<framestepp::SourceFile, std::string>;
@@ -185,7 +189,7 @@ int main(const int argument_count, char* arguments[]) {
         return 0;
     }
     if (argument_count == 2 && (command == "--version" || command == "-V")) {
-        std::cout << "FrameStep++ 0.1.0\n";
+        std::cout << "FrameStep++ " FRAMESTEPP_VERSION "\n";
         return 0;
     }
 

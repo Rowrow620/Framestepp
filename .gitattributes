@@ -1,3 +1,5 @@
 *.expected text eol=lf
 *.frame text eol=lf
 *.input text eol=lf
+*.stderr text eol=lf
+*.stdout text eol=lf

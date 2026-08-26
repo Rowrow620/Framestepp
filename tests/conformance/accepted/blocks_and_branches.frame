@@ -1,0 +1,5 @@
+let label = if 3 > 2 { "high" } else { "low" };
+print(label);
+print({ 40 + 2 });
+print({ 40 + 2; });
+print({});

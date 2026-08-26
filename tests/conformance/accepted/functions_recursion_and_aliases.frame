@@ -1,0 +1,16 @@
+fn fibonacci(n: Int) -> Int {
+    if n <= 1 { n } else { fibonacci(n - 1) + fibonacci(n - 2) }
+}
+
+fn even(n: Int) -> Bool {
+    if n == 0 { true } else { odd(n - 1) }
+}
+
+fn odd(n: Int) -> Bool {
+    if n == 0 { false } else { even(n - 1) }
+}
+
+let operation = fibonacci;
+print(operation(10));
+print(even(10));
+print(odd(7));

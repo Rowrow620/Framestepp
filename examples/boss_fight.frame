@@ -1,0 +1,24 @@
+fn damage(base: Int, critical: Bool) -> Int {
+    if critical {
+        print("Critical hit!");
+        base * 2
+    } else {
+        base
+    }
+}
+
+fn remaining_health(health: Int, hit: Int) -> Int {
+    if hit >= health {
+        0
+    } else {
+        health - hit
+    }
+}
+
+let mut boss_health = 120;
+let mut last_damage = 0;
+
+last_damage = damage(35, true);
+boss_health = remaining_health(boss_health, last_damage);
+print(last_damage);
+print(boss_health);

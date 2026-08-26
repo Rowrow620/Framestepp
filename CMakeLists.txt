@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.25)
 
 project(
     FrameStepPP
-    VERSION 0.1.0
+    VERSION 1.0.0
     DESCRIPTION "A C++20 implementation of the FrameStep programming language"
     LANGUAGES CXX
 )
@@ -59,7 +59,19 @@ framestepp_configure_target(framestepp_core)
 
 add_executable(framestepp app/main.cpp)
 target_link_libraries(framestepp PRIVATE FrameStepPP::core)
+target_compile_definitions(framestepp PRIVATE FRAMESTEPP_VERSION="${PROJECT_VERSION}")
 framestepp_configure_target(framestepp)
+
+add_custom_target(
+    conformance-report
+    COMMAND "${CMAKE_COMMAND}"
+            "-DFRAMESTEPP_EXECUTABLE=$<TARGET_FILE:framestepp>"
+            "-DREPORT_FILE=${CMAKE_CURRENT_BINARY_DIR}/conformance.md"
+            -P "${CMAKE_CURRENT_SOURCE_DIR}/tools/run_conformance.cmake"
+    DEPENDS framestepp
+    COMMENT "Running the source-level conformance corpus"
+    VERBATIM
+)
 
 include(CTest)
 if(BUILD_TESTING)
@@ -120,6 +132,14 @@ if(BUILD_TESTING)
                          PASS_REGULAR_EXPRESSION "framestepp run <FILE>")
 
     add_test(
+        NAME CliVersion
+        COMMAND "${CMAKE_COMMAND}"
+                "-DFRAMESTEPP_EXECUTABLE=$<TARGET_FILE:framestepp>"
+                "-DEXPECTED_VERSION=${PROJECT_VERSION}"
+                -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/expect_version.cmake"
+    )
+
+    add_test(
         NAME CliDisassembleFixture
         COMMAND "${CMAKE_COMMAND}"
                 "-DFRAMESTEPP_EXECUTABLE=$<TARGET_FILE:framestepp>"
@@ -172,6 +192,24 @@ if(BUILD_TESTING)
     )
 
     add_test(
+        NAME CliRunFibonacci
+        COMMAND "${CMAKE_COMMAND}"
+                "-DFRAMESTEPP_EXECUTABLE=$<TARGET_FILE:framestepp>"
+                "-DSOURCE_FILE=${CMAKE_CURRENT_SOURCE_DIR}/examples/fibonacci.frame"
+                "-DEXPECTED_FILE=${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/runtime/fibonacci.expected"
+                -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/expect_run.cmake"
+    )
+
+    add_test(
+        NAME CliRunBossFight
+        COMMAND "${CMAKE_COMMAND}"
+                "-DFRAMESTEPP_EXECUTABLE=$<TARGET_FILE:framestepp>"
+                "-DSOURCE_FILE=${CMAKE_CURRENT_SOURCE_DIR}/examples/boss_fight.frame"
+                "-DEXPECTED_FILE=${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/runtime/boss_fight.expected"
+                -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/expect_run.cmake"
+    )
+
+    add_test(
         NAME CliRunInput
         COMMAND "${CMAKE_COMMAND}"
                 "-DFRAMESTEPP_EXECUTABLE=$<TARGET_FILE:framestepp>"
@@ -209,4 +247,12 @@ if(BUILD_TESTING)
                 "-DEXPECTED_STDERR_FILE=${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/runtime/input_eof.stderr.expected"
                 -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/expect_run_failure.cmake"
     )
+
+    add_test(
+        NAME ConformanceCorpus
+        COMMAND "${CMAKE_COMMAND}"
+                "-DFRAMESTEPP_EXECUTABLE=$<TARGET_FILE:framestepp>"
+                -P "${CMAKE_CURRENT_SOURCE_DIR}/tools/run_conformance.cmake"
+    )
+    set_tests_properties(ConformanceCorpus PROPERTIES LABELS conformance)
 endif()

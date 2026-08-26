@@ -1,0 +1,14 @@
+print(2 + 3 * 4 - 5);
+print(17 / 5);
+print(17 % 5);
+print(-5);
+print(!false);
+print(1 < 2);
+print(2 <= 2);
+print(3 > 2);
+print(3 >= 3);
+print(1 == 1);
+print(true != false);
+print("Frame" + "Step");
+print("x" == "x");
+print({} == {});

@@ -1,0 +1,5 @@
+error: global initializers cannot call user-defined functions
+ --> SOURCE_FILE_PLACEHOLDER:1:19
+  |
+1 | let answer: Int = read();
+  |                   ^^^^

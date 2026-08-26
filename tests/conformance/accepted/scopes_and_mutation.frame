@@ -1,0 +1,9 @@
+let mut score = 10;
+let mut left = 0;
+let mut right = 0;
+
+{ let score = 99; print(score); };
+score = score + 5;
+print(score);
+print(left = right = 7);
+print(left + right);

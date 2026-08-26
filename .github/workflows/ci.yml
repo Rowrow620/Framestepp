@@ -83,3 +83,22 @@ jobs:
 
       - name: Test
         run: ctest --preset sanitize
+
+  release:
+    name: Release build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake --preset release -DFRAMESTEPP_WARNINGS_AS_ERRORS=ON
+
+      - name: Build
+        run: cmake --build --preset release --parallel
+
+      - name: Test
+        run: ctest --preset release
+
+      - name: Generate conformance report
+        run: cmake --build build/release --target conformance-report
