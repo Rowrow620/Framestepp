@@ -44,7 +44,9 @@ add_library(framestepp_core STATIC
     src/type.cpp
     src/type_checker.cpp
     src/utf8.hpp
+    src/value.cpp
     src/verifier.cpp
+    src/vm.cpp
 )
 add_library(FrameStepPP::core ALIAS framestepp_core)
 
@@ -81,7 +83,9 @@ if(BUILD_TESTING)
         tests/parser_test.cpp
         tests/source_diagnostic_test.cpp
         tests/type_checker_test.cpp
+        tests/value_test.cpp
         tests/verifier_test.cpp
+        tests/vm_test.cpp
     )
     target_link_libraries(framestepp_tests PRIVATE FrameStepPP::core GTest::gtest_main)
     framestepp_configure_target(framestepp_tests)
@@ -110,6 +114,10 @@ if(BUILD_TESTING)
     add_test(NAME CliHelpIncludesDisassemble COMMAND framestepp --help)
     set_tests_properties(CliHelpIncludesDisassemble PROPERTIES
                          PASS_REGULAR_EXPRESSION "framestepp disassemble <FILE>")
+
+    add_test(NAME CliHelpIncludesRun COMMAND framestepp --help)
+    set_tests_properties(CliHelpIncludesRun PROPERTIES
+                         PASS_REGULAR_EXPRESSION "framestepp run <FILE>")
 
     add_test(
         NAME CliDisassembleFixture
@@ -152,5 +160,53 @@ if(BUILD_TESTING)
                 "-DEXPECTED_LOCATION=:1:18"
                 "-DEXPECTED_CARET=^^^^^^^^^^^"
                 -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/expect_check_failure.cmake"
+    )
+
+    add_test(
+        NAME CliRunHello
+        COMMAND "${CMAKE_COMMAND}"
+                "-DFRAMESTEPP_EXECUTABLE=$<TARGET_FILE:framestepp>"
+                "-DSOURCE_FILE=${CMAKE_CURRENT_SOURCE_DIR}/examples/hello.frame"
+                "-DEXPECTED_FILE=${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/runtime/hello.expected"
+                -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/expect_run.cmake"
+    )
+
+    add_test(
+        NAME CliRunInput
+        COMMAND "${CMAKE_COMMAND}"
+                "-DFRAMESTEPP_EXECUTABLE=$<TARGET_FILE:framestepp>"
+                "-DSOURCE_FILE=${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/runtime/input.frame"
+                "-DINPUT_FILE=${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/runtime/name.input"
+                "-DEXPECTED_FILE=${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/runtime/input.expected"
+                -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/expect_run.cmake"
+    )
+
+    add_test(
+        NAME CliRunPreservesOutputBeforeRuntimeFailure
+        COMMAND "${CMAKE_COMMAND}"
+                "-DFRAMESTEPP_EXECUTABLE=$<TARGET_FILE:framestepp>"
+                "-DSOURCE_FILE=${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/runtime/divide_by_zero.frame"
+                "-DEXPECTED_STDOUT_FILE=${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/runtime/before.expected"
+                "-DEXPECTED_STDERR_FILE=${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/runtime/divide_by_zero.stderr.expected"
+                -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/expect_run_failure.cmake"
+    )
+
+    add_test(
+        NAME CliRunRejectsStaticErrorBeforeExecution
+        COMMAND "${CMAKE_COMMAND}"
+                "-DFRAMESTEPP_EXECUTABLE=$<TARGET_FILE:framestepp>"
+                "-DSOURCE_FILE=${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/runtime/static_error.frame"
+                "-DEXPECTED_STDERR_FILE=${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/runtime/static_error.stderr.expected"
+                -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/expect_run_failure.cmake"
+    )
+
+    add_test(
+        NAME CliRunRejectsInputEof
+        COMMAND "${CMAKE_COMMAND}"
+                "-DFRAMESTEPP_EXECUTABLE=$<TARGET_FILE:framestepp>"
+                "-DSOURCE_FILE=${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/runtime/input_eof.frame"
+                "-DINPUT_FILE=${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/runtime/empty.input"
+                "-DEXPECTED_STDERR_FILE=${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/runtime/input_eof.stderr.expected"
+                -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/expect_run_failure.cmake"
     )
 endif()

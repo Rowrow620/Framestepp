@@ -1,0 +1,2 @@
+let name: String = framein();
+frameout("Hello, " + name);

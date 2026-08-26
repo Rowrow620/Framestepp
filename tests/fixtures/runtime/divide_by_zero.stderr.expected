@@ -1,0 +1,5 @@
+error: division by zero
+ --> SOURCE_FILE_PLACEHOLDER:2:13
+  |
+2 | frameout(10 / 0);
+  |             ^

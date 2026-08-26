@@ -48,10 +48,11 @@ Parser::Parser(std::vector<Token> tokens) : tokens_{std::move(tokens)} {
     bool first_token = true;
     for (const auto& token : tokens_) {
         if (!token.span.is_valid() || (!first_token && token.span.start < previous_end)) {
-            diagnostic_.emplace(DiagnosticSeverity::error,
-                                "malformed token stream: invalid or out-of-order token span",
-                                Span{std::min(token.span.start, token.span.end),
-                                     std::max(token.span.start, token.span.end)});
+            diagnostic_.emplace(
+                Diagnostic{DiagnosticSeverity::error,
+                           "malformed token stream: invalid or out-of-order token span",
+                           Span{std::min(token.span.start, token.span.end),
+                                std::max(token.span.start, token.span.end)}});
             break;
         }
         previous_end = token.span.end;
@@ -611,7 +612,7 @@ const Token& Parser::advance() noexcept {
 
 void Parser::fail(const std::string_view message, const Span span) {
     if (!diagnostic_) {
-        diagnostic_.emplace(DiagnosticSeverity::error, std::string{message}, span);
+        diagnostic_.emplace(Diagnostic{DiagnosticSeverity::error, std::string{message}, span});
     }
 }
 

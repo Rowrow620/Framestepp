@@ -1,0 +1,2 @@
+frameout("must not run");
+frameout(1 + false);

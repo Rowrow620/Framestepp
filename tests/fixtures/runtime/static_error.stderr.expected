@@ -1,0 +1,5 @@
+error: operator `+` is not defined for Int and Bool
+ --> SOURCE_FILE_PLACEHOLDER:2:12
+  |
+2 | frameout(1 + false);
+  |            ^

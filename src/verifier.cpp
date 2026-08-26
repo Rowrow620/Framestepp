@@ -1,6 +1,7 @@
 #include "framestepp/verifier.hpp"
 
 #include "framestepp/type.hpp"
+#include "utf8.hpp"
 
 #include <algorithm>
 #include <cstddef>
@@ -169,6 +170,10 @@ class Verification final {
         for (const auto& constant : module_.constants) {
             if (constant.valueless_by_exception()) {
                 return make_error("constant table contains a valueless entry", Span{});
+            }
+            if (const auto* text = std::get_if<std::string>(&constant);
+                text != nullptr && !detail::is_valid_utf8(*text)) {
+                return make_error("string constant is not valid UTF-8", Span{});
             }
         }
 

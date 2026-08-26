@@ -1,0 +1,2 @@
+frameout("before");
+frameout(10 / 0);

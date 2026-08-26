@@ -1,0 +1,5 @@
+error: framein reached end of input
+ --> SOURCE_FILE_PLACEHOLDER:1:12
+  |
+1 | let name = framein();
+  |            ^^^^^^^^^

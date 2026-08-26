@@ -65,6 +65,18 @@ struct Utf8Unit final {
     return Utf8Unit{1, false};
 }
 
+[[nodiscard]] inline bool is_valid_utf8(const std::string_view text) noexcept {
+    std::size_t offset = 0;
+    while (offset < text.size()) {
+        const auto unit = decode_utf8_unit(text, offset);
+        if (!unit.valid || unit.width == 0U) {
+            return false;
+        }
+        offset += unit.width;
+    }
+    return true;
+}
+
 [[nodiscard]] inline std::size_t utf8_boundary_before_or_at(const std::string_view text,
                                                             std::size_t offset) noexcept {
     offset = std::min(offset, text.size());
