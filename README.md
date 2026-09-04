@@ -1,6 +1,7 @@
 # FrameStep++
 
 [![CI](https://github.com/Rowrow620/Framestepp/actions/workflows/ci.yml/badge.svg)](https://github.com/Rowrow620/Framestepp/actions/workflows/ci.yml)
+[![Playground](https://img.shields.io/badge/Try_it-Live_Playground-5eead4?logo=webassembly&logoColor=111827)](https://rowrow620.github.io/Framestepp/)
 
 FrameStep++ is a statically typed programming language built from scratch in
 C++20. It checks source programs, compiles them into verified bytecode, and
