@@ -484,15 +484,6 @@
   line-height: 1.55;
 }
 
-.tip-copy {
-  margin: 24px 16px 0;
-  padding-top: 16px;
-  border-top: 1px solid var(--border);
-  color: var(--faint);
-  font-size: 0.78rem;
-  line-height: 1.55;
-}
-
 .result-toolbar {
   display: flex;
   align-items: center;

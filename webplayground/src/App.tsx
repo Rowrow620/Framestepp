@@ -493,10 +493,6 @@ function App() {
             <h3>Expected output</h3>
             <pre>{selectedExample.expectedOutput}</pre>
           </div>
-          <p className="tip-copy">
-            Change the source, run it again, then reset whenever you want the
-            original example back.
-          </p>
         </aside>
       </main>
 
