@@ -378,12 +378,12 @@
 .action-button.primary {
   border-color: var(--accent-strong);
   color: #000;
-  background: var(--accent);
+  background: #28a63d;
 }
 
 .action-button.primary:hover:not(:disabled) {
   color: #000;
-  background: #72ff59;
+  background: #2cb344;
 }
 
 .action-button:disabled,
