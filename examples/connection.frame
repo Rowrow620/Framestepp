@@ -1,0 +1,10 @@
+fn transmit(message: String) {
+    frameout(message);
+}
+
+transmit("ARE YOU THERE?");
+transmit("ARE WE CONNECTED?");
+transmit("EXCELLENT.");
+transmit("TRULY EXCELLENT.");
+transmit("NOW.");
+transmit("WE MAY BEGIN.");

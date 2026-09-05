@@ -13,10 +13,11 @@ const compiler = await createFrameStepModule({
 
 const examples = [
   {
-    name: 'hello',
-    source: new URL('../../examples/hello.frame', import.meta.url),
-    output: 'Hello, Ada\n',
-    bytecodeMarker: 'function 0000 greet',
+    name: 'connection',
+    source: new URL('../../examples/connection.frame', import.meta.url),
+    output:
+      'ARE YOU THERE?\nARE WE CONNECTED?\nEXCELLENT.\nTRULY EXCELLENT.\nNOW.\nWE MAY BEGIN.\n',
+    bytecodeMarker: 'function 0000 transmit',
   },
   {
     name: 'fibonacci',

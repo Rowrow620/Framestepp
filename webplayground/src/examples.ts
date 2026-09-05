@@ -1,8 +1,8 @@
 import bossFightSource from '../../examples/boss_fight.frame?raw'
+import connectionSource from '../../examples/connection.frame?raw'
 import fibonacciSource from '../../examples/fibonacci.frame?raw'
-import helloSource from '../../examples/hello.frame?raw'
 
-export type ExampleId = 'boss-fight' | 'fibonacci' | 'hello'
+export type ExampleId = 'boss-fight' | 'fibonacci' | 'connection'
 
 interface PlaygroundExample {
   id: ExampleId
@@ -41,13 +41,14 @@ export const examples: PlaygroundExample[] = [
     expectedOutput: '55',
   },
   {
-    id: 'hello',
-    name: 'Hello, Ada',
+    id: 'connection',
+    name: 'Connection',
     category: 'Language basics',
     summary:
-      'Builds a greeting with a typed function, string concatenation, and frameout.',
-    concepts: ['String values', 'Function parameters', 'Return types', 'frameout'],
-    source: helloSource,
-    expectedOutput: 'Hello, Ada',
+      'Sends a six-line connection sequence through a typed function and frameout.',
+    concepts: ['String values', 'Function parameters', 'Repeated calls', 'frameout'],
+    source: connectionSource,
+    expectedOutput:
+      'ARE YOU THERE?\nARE WE CONNECTED?\nEXCELLENT.\nTRULY EXCELLENT.\nNOW.\nWE MAY BEGIN.',
   },
 ]

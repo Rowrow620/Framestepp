@@ -107,13 +107,13 @@ if(BUILD_TESTING)
 
     add_test(
         NAME CliLexExample
-        COMMAND framestepp lex "${CMAKE_CURRENT_SOURCE_DIR}/examples/hello.frame"
+        COMMAND framestepp lex "${CMAKE_CURRENT_SOURCE_DIR}/examples/connection.frame"
     )
     set_tests_properties(CliLexExample PROPERTIES PASS_REGULAR_EXPRESSION "end of file")
 
     add_test(
         NAME CliParseExample
-        COMMAND framestepp parse "${CMAKE_CURRENT_SOURCE_DIR}/examples/hello.frame"
+        COMMAND framestepp parse "${CMAKE_CURRENT_SOURCE_DIR}/examples/connection.frame"
     )
     set_tests_properties(CliParseExample PROPERTIES PASS_REGULAR_EXPRESSION "Program")
 
@@ -183,11 +183,11 @@ if(BUILD_TESTING)
     )
 
     add_test(
-        NAME CliRunHello
+        NAME CliRunConnection
         COMMAND "${CMAKE_COMMAND}"
                 "-DFRAMESTEPP_EXECUTABLE=$<TARGET_FILE:framestepp>"
-                "-DSOURCE_FILE=${CMAKE_CURRENT_SOURCE_DIR}/examples/hello.frame"
-                "-DEXPECTED_FILE=${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/runtime/hello.expected"
+                "-DSOURCE_FILE=${CMAKE_CURRENT_SOURCE_DIR}/examples/connection.frame"
+                "-DEXPECTED_FILE=${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/runtime/connection.expected"
                 -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/expect_run.cmake"
     )
 
