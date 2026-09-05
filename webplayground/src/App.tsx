@@ -41,8 +41,13 @@ const terminalTitles: Record<CompilerAction, string> = {
 
 const connectionTransmission: TransmissionOptions = {
   characterMs: 40,
+  lastLineCharacterMs: 50,
   lineBreakMs: 240,
-  maxDurationMs: 5500,
+  maxDurationMs: 6500,
+  pauseBeforeLine: {
+    line: 4,
+    durationMs: 300,
+  },
   pauseBeforeLastLineMs: 800,
 }
 

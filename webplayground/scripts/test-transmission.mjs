@@ -33,15 +33,22 @@ assert.equal(
 )
 
 const connectionPlan = createTransmissionPlan(
-  'ARE YOU THERE?\nARE WE CONNECTED?\nEXCELLENT.\nTRULY EXCELLENT.\nNOW.\n\nWE MAY BEGIN.\n',
+  'ARE YOU THERE?\nARE WE CONNECTED?\n\nEXCELLENT.\nTRULY EXCELLENT.\nNOW.\n\nWE MAY BEGIN.\n',
   {
     characterMs: 40,
+    lastLineCharacterMs: 50,
     lineBreakMs: 240,
-    maxDurationMs: 5500,
+    maxDurationMs: 6500,
+    pauseBeforeLine: {
+      line: 4,
+      durationMs: 300,
+    },
     pauseBeforeLastLineMs: 800,
   },
 )
-const finalLineStart = connectionPlan.characters.lastIndexOf('W')
+const connectionText = connectionPlan.characters.join('')
+const excellentStart = connectionText.indexOf('EXCELLENT.')
+const finalLineStart = connectionText.lastIndexOf('WE MAY BEGIN.')
 const firstLineBreak = connectionPlan.characters.indexOf('\n')
 assert.equal(connectionPlan.playbackRate, 1)
 assert.equal(connectionPlan.revealAt[0], 40)
@@ -51,11 +58,21 @@ assert.equal(
   240,
 )
 assert.equal(
+  connectionPlan.revealAt[excellentStart] -
+    connectionPlan.revealAt[excellentStart - 1],
+  340,
+)
+assert.equal(
   connectionPlan.revealAt[finalLineStart] -
     connectionPlan.revealAt[finalLineStart - 1],
-  840,
+  850,
 )
-assert.equal(connectionPlan.revealAt.at(-1), 5440)
+assert.equal(
+  connectionPlan.revealAt[finalLineStart + 1] -
+    connectionPlan.revealAt[finalLineStart],
+  50,
+)
+assert.equal(connectionPlan.revealAt.at(-1), 6110)
 
 const longPlan = createTransmissionPlan('x'.repeat(1000) + '\n'.repeat(30))
 const displayedDuration =

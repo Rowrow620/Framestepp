@@ -4,6 +4,7 @@ fn transmit(message: String) {
 
 transmit("ARE YOU THERE?");
 transmit("ARE WE CONNECTED?");
+transmit("");
 transmit("EXCELLENT.");
 transmit("TRULY EXCELLENT.");
 transmit("NOW.");

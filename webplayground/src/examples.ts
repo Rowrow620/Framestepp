@@ -49,6 +49,6 @@ export const examples: PlaygroundExample[] = [
     concepts: ['String values', 'Function parameters', 'Repeated calls', 'frameout'],
     source: connectionSource,
     expectedOutput:
-      'ARE YOU THERE?\nARE WE CONNECTED?\nEXCELLENT.\nTRULY EXCELLENT.\nNOW.\n\nWE MAY BEGIN.',
+      'ARE YOU THERE?\nARE WE CONNECTED?\n\nEXCELLENT.\nTRULY EXCELLENT.\nNOW.\n\nWE MAY BEGIN.',
   },
 ]

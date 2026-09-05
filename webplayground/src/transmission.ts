@@ -11,8 +11,13 @@ export interface TransmissionPlan {
 
 export interface TransmissionOptions {
   characterMs?: number
+  lastLineCharacterMs?: number
   lineBreakMs?: number
   maxDurationMs?: number
+  pauseBeforeLine?: {
+    line: number
+    durationMs: number
+  }
   pauseBeforeLastLineMs?: number
 }
 
@@ -55,6 +60,24 @@ const findLastLineStart = (characters: string[]) => {
   return 0
 }
 
+const findLineStart = (characters: string[], targetLine: number) => {
+  if (targetLine <= 1) {
+    return 0
+  }
+
+  let currentLine = 1
+  for (const [index, character] of characters.entries()) {
+    if (character === '\n') {
+      currentLine += 1
+      if (currentLine === targetLine) {
+        return index + 1
+      }
+    }
+  }
+
+  return -1
+}
+
 export const createTransmissionPlan = (
   text: string,
   options: TransmissionOptions = {},
@@ -62,19 +85,32 @@ export const createTransmissionPlan = (
   const characters = splitCharacters(text)
   const revealAt: number[] = []
   const characterMs = options.characterMs ?? TRANSMISSION_CHARACTER_MS
+  const lastLineCharacterMs = options.lastLineCharacterMs ?? characterMs
   const lineBreakMs = options.lineBreakMs ?? TRANSMISSION_LINE_BREAK_MS
   const maxDurationMs =
     options.maxDurationMs ?? MAX_TRANSMISSION_DURATION_MS
   const pauseBeforeLastLineMs = options.pauseBeforeLastLineMs ?? 0
   const lastLineStart = findLastLineStart(characters)
+  const pauseBeforeLineStart = options.pauseBeforeLine
+    ? findLineStart(characters, options.pauseBeforeLine.line)
+    : -1
   let duration = 0
 
   for (const [index, character] of characters.entries()) {
+    if (index === pauseBeforeLineStart && pauseBeforeLineStart > 0) {
+      duration += options.pauseBeforeLine?.durationMs ?? 0
+    }
+
     if (index === lastLineStart && lastLineStart > 0) {
       duration += pauseBeforeLastLineMs
     }
 
-    duration += character === '\n' ? lineBreakMs : characterMs
+    duration +=
+      character === '\n'
+        ? lineBreakMs
+        : index >= lastLineStart
+          ? lastLineCharacterMs
+          : characterMs
     revealAt.push(duration)
   }
 
