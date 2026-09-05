@@ -528,11 +528,32 @@
   color: #ffb0bb;
 }
 
+.result-content.is-transmitting {
+  cursor: pointer;
+}
+
 .result-content pre {
   font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
   font-size: 0.84rem;
   line-height: 1.55;
   white-space: pre;
+}
+
+.terminal-newest {
+  animation: terminal-character-settle 180ms ease-out both;
+}
+
+.terminal-cursor {
+  display: inline-block;
+  width: 0.62ch;
+  height: 1.05em;
+  margin-left: 0.1ch;
+  vertical-align: -0.16em;
+  background: var(--accent);
+  box-shadow: 0 0 8px rgba(57, 255, 20, 0.8);
+  animation: terminal-cursor-blink 850ms steps(1, end) infinite;
+  pointer-events: none;
+  user-select: none;
 }
 
 .visually-hidden {
@@ -558,9 +579,40 @@
   }
 }
 
+@keyframes terminal-character-settle {
+  from {
+    color: #efffef;
+    text-shadow:
+      0 0 5px rgba(57, 255, 20, 0.95),
+      0 0 12px rgba(57, 255, 20, 0.45);
+  }
+  to {
+    color: var(--text);
+    text-shadow: none;
+  }
+}
+
+@keyframes terminal-cursor-blink {
+  0%,
+  48% {
+    opacity: 1;
+  }
+  49%,
+  100% {
+    opacity: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .status-dot {
+  .status-dot,
+  .terminal-newest,
+  .terminal-cursor {
     animation: none !important;
+  }
+
+  .terminal-newest {
+    color: inherit;
+    text-shadow: none;
   }
 }
 

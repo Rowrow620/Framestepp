@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
 import { examples } from './examples'
 import type { ExampleId } from './examples'
+import { useTransmission } from './useTransmission'
 
 type CompilerAction = 'check' | 'run' | 'disassemble'
 type CompilerStatus = 'loading' | 'ready' | 'error'
@@ -65,6 +66,13 @@ function App() {
   const requestIdRef = useRef(0)
   const timeoutRef = useRef<number | null>(null)
   const gutterRef = useRef<HTMLDivElement | null>(null)
+  const resultContentRef = useRef<HTMLDivElement | null>(null)
+  const {
+    cancelTransmission,
+    finishTransmission,
+    frame: transmission,
+    startTransmission,
+  } = useTransmission()
 
   const clearRequestTimer = useCallback(() => {
     if (timeoutRef.current !== null) {
@@ -87,6 +95,12 @@ function App() {
         }
       }
 
+      if (action === 'run' && result.success && result.output) {
+        startTransmission(text)
+      } else {
+        cancelTransmission()
+      }
+
       setTerminal({
         action,
         phase: result.success ? 'success' : 'error',
@@ -103,10 +117,11 @@ function App() {
       const outcome = result.success ? 'completed' : 'completed with errors'
       setAnnouncement(`${resultName} ${outcome}.`)
     },
-    [],
+    [cancelTransmission, startTransmission],
   )
 
   const startCompiler = useCallback(() => {
+    cancelTransmission()
     clearRequestTimer()
     workerRef.current?.terminate()
     requestIdRef.current += 1
@@ -137,6 +152,7 @@ function App() {
       }
 
       if (response.type === 'load-error') {
+        cancelTransmission()
         clearRequestTimer()
         setIsWorking(false)
         setCompilerStatus('error')
@@ -170,6 +186,7 @@ function App() {
         return
       }
 
+      cancelTransmission()
       clearRequestTimer()
       setIsWorking(false)
       setCompilerStatus('error')
@@ -199,6 +216,7 @@ function App() {
       worker.terminate()
       workerRef.current = null
       timeoutRef.current = null
+      cancelTransmission()
       setCompilerStatus('error')
       setCompilerMessage('Compiler load timed out')
       setCompilerErrorDetail(
@@ -206,7 +224,7 @@ function App() {
       )
       setAnnouncement('The compiler took too long to load. Retry when ready.')
     }, 15000)
-  }, [applyResult, clearRequestTimer])
+  }, [applyResult, cancelTransmission, clearRequestTimer])
 
   useEffect(() => {
     const startupTimer = window.setTimeout(startCompiler, 0)
@@ -225,6 +243,7 @@ function App() {
     }
 
     requestIdRef.current += 1
+    cancelTransmission()
     setSelectedId(id)
     setSource(nextExample.source)
     setTerminal(makeIdleTerminal())
@@ -232,6 +251,7 @@ function App() {
   }
 
   const resetExample = () => {
+    cancelTransmission()
     setSource(selectedExample.source)
     setTerminal(makeIdleTerminal())
     setAnnouncement(`${selectedExample.name} restored.`)
@@ -242,6 +262,7 @@ function App() {
       return
     }
 
+    cancelTransmission()
     const id = requestIdRef.current + 1
     const actionMessage =
       action === 'check'
@@ -296,6 +317,19 @@ function App() {
     : 'Terminal'
   const lineCount = Math.max(source.split('\n').length, 1)
   const isModified = source !== selectedExample.source
+  const isTransmissionVisible =
+    transmission.enabled &&
+    terminal.action === 'run' &&
+    terminal.phase === 'success' &&
+    transmission.target === terminal.text
+
+  useEffect(() => {
+    if (!isTransmissionVisible || !resultContentRef.current) {
+      return
+    }
+
+    resultContentRef.current.scrollTop = resultContentRef.current.scrollHeight
+  }, [isTransmissionVisible, transmission.visibleText])
 
   return (
     <div className="app-shell">
@@ -394,6 +428,7 @@ function App() {
             <textarea
               value={source}
               onChange={(event) => {
+                cancelTransmission()
                 setSource(event.target.value)
                 setTerminal(makeIdleTerminal())
               }}
@@ -449,7 +484,7 @@ function App() {
         <section
           className="panel results-panel"
           aria-labelledby="results-title"
-          aria-busy={terminal.phase === 'working'}
+          aria-busy={terminal.phase === 'working' || transmission.active}
         >
           <div className="result-toolbar">
             <div className="terminal-heading">
@@ -463,10 +498,33 @@ function App() {
             )}
           </div>
           <div
-            className={`result-content ${terminal.phase !== 'idle' ? 'has-result' : ''} ${terminal.phase}`}
+            className={`result-content ${terminal.phase !== 'idle' ? 'has-result' : ''} ${terminal.phase} ${transmission.active ? 'is-transmitting' : ''}`}
+            ref={resultContentRef}
             tabIndex={0}
+            aria-keyshortcuts={transmission.active ? 'Space' : undefined}
+            onClick={transmission.active ? finishTransmission : undefined}
           >
-            <pre>{terminal.text}</pre>
+            <pre>
+              {isTransmissionVisible ? (
+                <>
+                  <span>
+                    {transmission.visibleText.slice(
+                      0,
+                      transmission.freshStart,
+                    )}
+                  </span>
+                  <span
+                    className="terminal-newest"
+                    key={transmission.visibleText.length}
+                  >
+                    {transmission.visibleText.slice(transmission.freshStart)}
+                  </span>
+                  <span className="terminal-cursor" aria-hidden="true" />
+                </>
+              ) : (
+                terminal.text
+              )}
+            </pre>
           </div>
         </section>
 

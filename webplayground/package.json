@@ -8,8 +8,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
+    "test:transmission": "node scripts/test-transmission.mjs",
     "test:wasm": "node scripts/test-wasm.mjs",
-    "verify": "npm run lint && npm run build && npm run test:wasm",
+    "verify": "npm run lint && npm run build && npm run test:transmission && npm run test:wasm",
     "preview": "vite preview"
   },
   "dependencies": {
