@@ -19,8 +19,16 @@ const {
   TRANSMISSION_CHARACTER_MS,
   TRANSMISSION_LINE_BREAK_MS,
   createTransmissionPlan,
+  removeFinalLineBreak,
   shouldAnimateTransmission,
 } = await import(transmissionModuleUrl)
+
+assert.equal(removeFinalLineBreak('END.\n'), 'END.')
+assert.equal(removeFinalLineBreak('END.\r\n'), 'END.')
+assert.equal(removeFinalLineBreak('END.\r'), 'END.')
+assert.equal(removeFinalLineBreak('END.\n\n'), 'END.\n')
+assert.equal(removeFinalLineBreak('END.'), 'END.')
+assert.equal(removeFinalLineBreak(''), '')
 
 const shortPlan = createTransmissionPlan('AB\nC')
 assert.deepEqual(shortPlan.characters, ['A', 'B', '\n', 'C'])
@@ -51,8 +59,11 @@ const trailingBlankLinePlan = createTransmissionPlan('A\n\n', {
 })
 assert.deepEqual(trailingBlankLinePlan.revealAt, [20, 140, 260])
 
-const connectionPlan = createTransmissionPlan(
+const connectionOutput = removeFinalLineBreak(
   'ARE YOU THERE?\nARE WE CONNECTED?\n\nEXCELLENT.\nTRULY EXCELLENT.\nNOW.\n\nWE MAY BEGIN.\n',
+)
+const connectionPlan = createTransmissionPlan(
+  connectionOutput,
   {
     batchConsecutiveLineBreaks: true,
     characterMs: 40,
@@ -67,6 +78,8 @@ const connectionPlan = createTransmissionPlan(
   },
 )
 const connectionText = connectionPlan.characters.join('')
+assert.equal(connectionText, connectionOutput)
+assert.ok(connectionText.endsWith('WE MAY BEGIN.'))
 const connectedEnd =
   connectionText.indexOf('ARE WE CONNECTED?') +
   'ARE WE CONNECTED?'.length -
@@ -113,7 +126,7 @@ assert.equal(
     connectionPlan.revealAt[finalLineStart],
   100,
 )
-assert.equal(connectionPlan.revealAt.at(-1), 6760)
+assert.equal(connectionPlan.revealAt.at(-1), 6520)
 
 const longPlan = createTransmissionPlan('x'.repeat(1000) + '\n'.repeat(30))
 const displayedDuration =

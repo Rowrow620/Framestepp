@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
 import { examples } from './examples'
 import type { ExampleId } from './examples'
+import { removeFinalLineBreak } from './transmission'
 import type { TransmissionOptions } from './transmission'
 import { useTransmission } from './useTransmission'
 
@@ -103,7 +104,11 @@ function App() {
       let text = result.success ? result.output : result.diagnostic
       if (action === 'run') {
         if (result.success) {
-          text = result.output || '(Program completed without output.)'
+          const output =
+            selectedIdRef.current === 'connection'
+              ? removeFinalLineBreak(result.output)
+              : result.output
+          text = output || '(Program completed without output.)'
         } else if (result.output) {
           const separator = result.output.endsWith('\n') ? '\n' : '\n\n'
           text = `${result.output}${separator}[error]\n${result.diagnostic}`

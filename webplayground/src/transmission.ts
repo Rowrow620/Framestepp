@@ -33,6 +33,14 @@ const splitCharacters = (text: string) => {
   return Array.from(text)
 }
 
+export const removeFinalLineBreak = (text: string) => {
+  if (text.endsWith('\r\n')) {
+    return text.slice(0, -2)
+  }
+
+  return text.endsWith('\n') || text.endsWith('\r') ? text.slice(0, -1) : text
+}
+
 export const shouldAnimateTransmission = (
   textLength: number,
   prefersReducedMotion: boolean,
