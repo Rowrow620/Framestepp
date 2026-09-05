@@ -7,4 +7,5 @@ transmit("ARE WE CONNECTED?");
 transmit("EXCELLENT.");
 transmit("TRULY EXCELLENT.");
 transmit("NOW.");
+transmit("");
 transmit("WE MAY BEGIN.");

@@ -45,10 +45,10 @@ export const examples: PlaygroundExample[] = [
     name: 'Connection',
     category: 'Language basics',
     summary:
-      'Sends a six-line connection sequence through a typed function and frameout.',
+      'Sends a connection sequence with a deliberate pause through a typed function and frameout.',
     concepts: ['String values', 'Function parameters', 'Repeated calls', 'frameout'],
     source: connectionSource,
     expectedOutput:
-      'ARE YOU THERE?\nARE WE CONNECTED?\nEXCELLENT.\nTRULY EXCELLENT.\nNOW.\nWE MAY BEGIN.',
+      'ARE YOU THERE?\nARE WE CONNECTED?\nEXCELLENT.\nTRULY EXCELLENT.\nNOW.\n\nWE MAY BEGIN.',
   },
 ]

@@ -16,7 +16,7 @@ const examples = [
     name: 'connection',
     source: new URL('../../examples/connection.frame', import.meta.url),
     output:
-      'ARE YOU THERE?\nARE WE CONNECTED?\nEXCELLENT.\nTRULY EXCELLENT.\nNOW.\nWE MAY BEGIN.\n',
+      'ARE YOU THERE?\nARE WE CONNECTED?\nEXCELLENT.\nTRULY EXCELLENT.\nNOW.\n\nWE MAY BEGIN.\n',
     bytecodeMarker: 'function 0000 transmit',
   },
   {

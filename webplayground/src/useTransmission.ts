@@ -3,6 +3,7 @@ import {
   createTransmissionPlan,
   shouldAnimateTransmission,
 } from './transmission'
+import type { TransmissionOptions } from './transmission'
 
 export interface TransmissionFrame {
   active: boolean
@@ -66,7 +67,7 @@ export const useTransmission = () => {
   }, [clearAnimationFrame])
 
   const startTransmission = useCallback(
-    (text: string) => {
+    (text: string, options?: TransmissionOptions) => {
       generationRef.current += 1
       const generation = generationRef.current
       clearAnimationFrame()
@@ -86,7 +87,7 @@ export const useTransmission = () => {
         return
       }
 
-      const plan = createTransmissionPlan(text)
+      const plan = createTransmissionPlan(text, options)
       let revealedCount = 0
       let startedAt: number | null = null
 

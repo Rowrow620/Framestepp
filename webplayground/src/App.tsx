@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
 import { examples } from './examples'
 import type { ExampleId } from './examples'
+import type { TransmissionOptions } from './transmission'
 import { useTransmission } from './useTransmission'
 
 type CompilerAction = 'check' | 'run' | 'disassemble'
@@ -38,6 +39,13 @@ const terminalTitles: Record<CompilerAction, string> = {
   disassemble: 'Bytecode',
 }
 
+const connectionTransmission: TransmissionOptions = {
+  characterMs: 40,
+  lineBreakMs: 240,
+  maxDurationMs: 5500,
+  pauseBeforeLastLineMs: 800,
+}
+
 const makeIdleTerminal = (): TerminalState => ({
   action: null,
   phase: 'idle',
@@ -47,6 +55,7 @@ const makeIdleTerminal = (): TerminalState => ({
 
 function App() {
   const [selectedId, setSelectedId] = useState<ExampleId>('boss-fight')
+  const selectedIdRef = useRef<ExampleId>('boss-fight')
   const selectedExample = useMemo(
     () => examples.find((example) => example.id === selectedId) ?? examples[0],
     [selectedId],
@@ -96,7 +105,12 @@ function App() {
       }
 
       if (action === 'run' && result.success && result.output) {
-        startTransmission(text)
+        startTransmission(
+          text,
+          selectedIdRef.current === 'connection'
+            ? connectionTransmission
+            : undefined,
+        )
       } else {
         cancelTransmission()
       }
@@ -244,6 +258,7 @@ function App() {
 
     requestIdRef.current += 1
     cancelTransmission()
+    selectedIdRef.current = id
     setSelectedId(id)
     setSource(nextExample.source)
     setTerminal(makeIdleTerminal())
