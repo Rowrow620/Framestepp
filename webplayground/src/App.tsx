@@ -42,9 +42,9 @@ const terminalTitles: Record<CompilerAction, string> = {
 const connectionTransmission: TransmissionOptions = {
   batchConsecutiveLineBreaks: true,
   characterMs: 40,
-  lastLineCharacterMs: 50,
+  lastLineCharacterMs: 100,
   lineBreakMs: 240,
-  maxDurationMs: 6500,
+  maxDurationMs: 7000,
   pauseBeforeLine: {
     line: 4,
     durationMs: 300,

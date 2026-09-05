@@ -56,9 +56,9 @@ const connectionPlan = createTransmissionPlan(
   {
     batchConsecutiveLineBreaks: true,
     characterMs: 40,
-    lastLineCharacterMs: 50,
+    lastLineCharacterMs: 100,
     lineBreakMs: 240,
-    maxDurationMs: 6500,
+    maxDurationMs: 7000,
     pauseBeforeLine: {
       line: 4,
       durationMs: 300,
@@ -98,7 +98,7 @@ assert.equal(
 assert.equal(
   connectionPlan.revealAt[finalLineStart] -
     connectionPlan.revealAt[nowEnd],
-  1330,
+  1380,
 )
 assert.equal(
   connectionPlan.revealAt[finalLineStart - 2],
@@ -111,9 +111,9 @@ assert.equal(
 assert.equal(
   connectionPlan.revealAt[finalLineStart + 1] -
     connectionPlan.revealAt[finalLineStart],
-  50,
+  100,
 )
-assert.equal(connectionPlan.revealAt.at(-1), 6110)
+assert.equal(connectionPlan.revealAt.at(-1), 6760)
 
 const longPlan = createTransmissionPlan('x'.repeat(1000) + '\n'.repeat(30))
 const displayedDuration =
