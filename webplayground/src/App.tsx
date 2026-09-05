@@ -40,6 +40,7 @@ const terminalTitles: Record<CompilerAction, string> = {
 }
 
 const connectionTransmission: TransmissionOptions = {
+  batchConsecutiveLineBreaks: true,
   characterMs: 40,
   lastLineCharacterMs: 50,
   lineBreakMs: 240,

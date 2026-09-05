@@ -32,9 +32,29 @@ assert.equal(
   TRANSMISSION_LINE_BREAK_MS,
 )
 
+const defaultBlankLinePlan = createTransmissionPlan('A\n\nB')
+assert.deepEqual(defaultBlankLinePlan.revealAt, [20, 140, 260, 280])
+
+const smoothBlankLinePlan = createTransmissionPlan('A\n\nB', {
+  batchConsecutiveLineBreaks: true,
+})
+assert.equal(smoothBlankLinePlan.characters.join(''), 'A\n\nB')
+assert.deepEqual(smoothBlankLinePlan.revealAt, [20, 280, 280, 280])
+
+const smoothSingleLineBreakPlan = createTransmissionPlan('A\nB', {
+  batchConsecutiveLineBreaks: true,
+})
+assert.deepEqual(smoothSingleLineBreakPlan.revealAt, [20, 140, 160])
+
+const trailingBlankLinePlan = createTransmissionPlan('A\n\n', {
+  batchConsecutiveLineBreaks: true,
+})
+assert.deepEqual(trailingBlankLinePlan.revealAt, [20, 140, 260])
+
 const connectionPlan = createTransmissionPlan(
   'ARE YOU THERE?\nARE WE CONNECTED?\n\nEXCELLENT.\nTRULY EXCELLENT.\nNOW.\n\nWE MAY BEGIN.\n',
   {
+    batchConsecutiveLineBreaks: true,
     characterMs: 40,
     lastLineCharacterMs: 50,
     lineBreakMs: 240,
@@ -47,7 +67,12 @@ const connectionPlan = createTransmissionPlan(
   },
 )
 const connectionText = connectionPlan.characters.join('')
+const connectedEnd =
+  connectionText.indexOf('ARE WE CONNECTED?') +
+  'ARE WE CONNECTED?'.length -
+  1
 const excellentStart = connectionText.indexOf('EXCELLENT.')
+const nowEnd = connectionText.indexOf('NOW.') + 'NOW.'.length - 1
 const finalLineStart = connectionText.lastIndexOf('WE MAY BEGIN.')
 const firstLineBreak = connectionPlan.characters.indexOf('\n')
 assert.equal(connectionPlan.playbackRate, 1)
@@ -59,13 +84,29 @@ assert.equal(
 )
 assert.equal(
   connectionPlan.revealAt[excellentStart] -
-    connectionPlan.revealAt[excellentStart - 1],
-  340,
+    connectionPlan.revealAt[connectedEnd],
+  820,
+)
+assert.equal(
+  connectionPlan.revealAt[excellentStart - 2],
+  connectionPlan.revealAt[excellentStart],
+)
+assert.equal(
+  connectionPlan.revealAt[excellentStart - 1],
+  connectionPlan.revealAt[excellentStart],
 )
 assert.equal(
   connectionPlan.revealAt[finalLineStart] -
-    connectionPlan.revealAt[finalLineStart - 1],
-  850,
+    connectionPlan.revealAt[nowEnd],
+  1330,
+)
+assert.equal(
+  connectionPlan.revealAt[finalLineStart - 2],
+  connectionPlan.revealAt[finalLineStart],
+)
+assert.equal(
+  connectionPlan.revealAt[finalLineStart - 1],
+  connectionPlan.revealAt[finalLineStart],
 )
 assert.equal(
   connectionPlan.revealAt[finalLineStart + 1] -

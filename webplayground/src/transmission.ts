@@ -10,6 +10,7 @@ export interface TransmissionPlan {
 }
 
 export interface TransmissionOptions {
+  batchConsecutiveLineBreaks?: boolean
   characterMs?: number
   lastLineCharacterMs?: number
   lineBreakMs?: number
@@ -78,6 +79,41 @@ const findLineStart = (characters: string[], targetLine: number) => {
   return -1
 }
 
+const batchConsecutiveLineBreaks = (
+  characters: string[],
+  revealAt: number[],
+) => {
+  let index = 0
+
+  while (index < characters.length) {
+    if (characters[index] !== '\n' || characters[index + 1] !== '\n') {
+      index += 1
+      continue
+    }
+
+    let nextCharacter = index + 2
+    while (
+      nextCharacter < characters.length &&
+      characters[nextCharacter] === '\n'
+    ) {
+      nextCharacter += 1
+    }
+
+    if (nextCharacter < characters.length) {
+      const revealTime = revealAt[nextCharacter]
+      for (
+        let lineBreak = index;
+        lineBreak < nextCharacter;
+        lineBreak += 1
+      ) {
+        revealAt[lineBreak] = revealTime
+      }
+    }
+
+    index = nextCharacter
+  }
+}
+
 export const createTransmissionPlan = (
   text: string,
   options: TransmissionOptions = {},
@@ -112,6 +148,10 @@ export const createTransmissionPlan = (
           ? lastLineCharacterMs
           : characterMs
     revealAt.push(duration)
+  }
+
+  if (options.batchConsecutiveLineBreaks) {
+    batchConsecutiveLineBreaks(characters, revealAt)
   }
 
   return {
