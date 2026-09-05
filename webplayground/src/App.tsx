@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import type { KeyboardEvent } from 'react'
 import './App.css'
 import { examples } from './examples'
 import type { ExampleId } from './examples'
 
 type CompilerAction = 'check' | 'run' | 'disassemble'
 type CompilerStatus = 'loading' | 'ready' | 'error'
-type ResultTab = 'output' | 'diagnostics' | 'bytecode'
+type TerminalPhase = 'idle' | 'working' | 'success' | 'error'
 
 interface PlaygroundResult {
   success: boolean
@@ -25,24 +24,24 @@ type WorkerResponse =
       result: PlaygroundResult
     }
 
-const tabs: ResultTab[] = ['output', 'diagnostics', 'bytecode']
-
-const tabLabels: Record<ResultTab, string> = {
-  output: 'Output',
-  diagnostics: 'Diagnostics',
-  bytecode: 'Bytecode',
+interface TerminalState {
+  action: CompilerAction | null
+  phase: TerminalPhase
+  text: string
+  instructionCount: number
 }
 
-const emptyPanelCopy: Record<ResultTab, string> = {
-  output: 'Run the selected program to see its output.',
-  diagnostics: 'Check the program to see type and syntax diagnostics.',
-  bytecode: 'Compile the program to inspect its verified bytecode.',
+const terminalTitles: Record<CompilerAction, string> = {
+  check: 'Type check',
+  run: 'Program output',
+  disassemble: 'Bytecode',
 }
 
-const makeEmptyPanels = (): Record<ResultTab, string> => ({
-  output: '',
-  diagnostics: '',
-  bytecode: '',
+const makeIdleTerminal = (): TerminalState => ({
+  action: null,
+  phase: 'idle',
+  text: 'Choose Check types, Run, or View bytecode.',
+  instructionCount: 0,
 })
 
 function App() {
@@ -59,10 +58,8 @@ function App() {
   )
   const [compilerErrorDetail, setCompilerErrorDetail] = useState('')
   const [isWorking, setIsWorking] = useState(false)
-  const [activeTab, setActiveTab] = useState<ResultTab>('output')
-  const [panels, setPanels] =
-    useState<Record<ResultTab, string>>(makeEmptyPanels)
-  const [instructionCount, setInstructionCount] = useState(0)
+  const [terminal, setTerminal] =
+    useState<TerminalState>(makeIdleTerminal)
   const [announcement, setAnnouncement] = useState('')
   const workerRef = useRef<Worker | null>(null)
   const requestIdRef = useRef(0)
@@ -78,32 +75,24 @@ function App() {
 
   const applyResult = useCallback(
     (action: CompilerAction, result: PlaygroundResult) => {
-      setInstructionCount(result.executedInstructions)
       setCompilerMessage('Compiler ready')
 
-      if (action === 'check') {
-        setPanels((current) => ({
-          ...current,
-          diagnostics: result.success ? result.output : result.diagnostic,
-        }))
-        setActiveTab('diagnostics')
-      } else if (action === 'run') {
-        setPanels((current) => ({
-          ...current,
-          output:
-            result.output ||
-            (result.success ? '(Program completed without output.)' : ''),
-          diagnostics: result.diagnostic,
-        }))
-        setActiveTab(result.success ? 'output' : 'diagnostics')
-      } else {
-        setPanels((current) => ({
-          ...current,
-          bytecode: result.output,
-          diagnostics: result.diagnostic,
-        }))
-        setActiveTab(result.success ? 'bytecode' : 'diagnostics')
+      let text = result.success ? result.output : result.diagnostic
+      if (action === 'run') {
+        if (result.success) {
+          text = result.output || '(Program completed without output.)'
+        } else if (result.output) {
+          const separator = result.output.endsWith('\n') ? '\n' : '\n\n'
+          text = `${result.output}${separator}[error]\n${result.diagnostic}`
+        }
       }
+
+      setTerminal({
+        action,
+        phase: result.success ? 'success' : 'error',
+        text,
+        instructionCount: result.executedInstructions,
+      })
 
       const resultName =
         action === 'disassemble'
@@ -133,6 +122,10 @@ function App() {
     workerRef.current = worker
 
     worker.onmessage = (event: MessageEvent<WorkerResponse>) => {
+      if (workerRef.current !== worker) {
+        return
+      }
+
       const response = event.data
 
       if (response.type === 'ready') {
@@ -149,6 +142,16 @@ function App() {
         setCompilerStatus('error')
         setCompilerMessage('Compiler could not load')
         setCompilerErrorDetail(response.message)
+        setTerminal((current) =>
+          current.phase === 'working'
+            ? {
+                ...current,
+                phase: 'error',
+                text: response.message,
+                instructionCount: 0,
+              }
+            : current,
+        )
         setAnnouncement(response.message)
         return
       }
@@ -163,12 +166,26 @@ function App() {
     }
 
     worker.onerror = () => {
+      if (workerRef.current !== worker) {
+        return
+      }
+
       clearRequestTimer()
       setIsWorking(false)
       setCompilerStatus('error')
       setCompilerMessage('Compiler stopped unexpectedly')
-      setCompilerErrorDetail(
-        'The compiler worker stopped unexpectedly. Retry to load it again.',
+      const message =
+        'The compiler worker stopped unexpectedly. Retry to load it again.'
+      setCompilerErrorDetail(message)
+      setTerminal((current) =>
+        current.phase === 'working'
+          ? {
+              ...current,
+              phase: 'error',
+              text: message,
+              instructionCount: 0,
+            }
+          : current,
       )
       setAnnouncement('The compiler stopped unexpectedly. Retry to reload it.')
     }
@@ -210,17 +227,13 @@ function App() {
     requestIdRef.current += 1
     setSelectedId(id)
     setSource(nextExample.source)
-    setPanels(makeEmptyPanels())
-    setInstructionCount(0)
-    setActiveTab('output')
+    setTerminal(makeIdleTerminal())
     setAnnouncement(`${nextExample.name} example selected.`)
   }
 
   const resetExample = () => {
     setSource(selectedExample.source)
-    setPanels(makeEmptyPanels())
-    setInstructionCount(0)
-    setActiveTab('output')
+    setTerminal(makeIdleTerminal())
     setAnnouncement(`${selectedExample.name} restored.`)
   }
 
@@ -239,6 +252,12 @@ function App() {
     requestIdRef.current = id
     setIsWorking(true)
     setCompilerMessage(actionMessage)
+    setTerminal({
+      action,
+      phase: 'working',
+      text: `${actionMessage}...`,
+      instructionCount: 0,
+    })
     setAnnouncement(`${actionMessage}.`)
     workerRef.current.postMessage({
       type: 'execute',
@@ -261,50 +280,34 @@ function App() {
       setCompilerErrorDetail(
         'The browser stopped this run because it took too long. Retry the compiler and check the program for an endless loop.',
       )
-      setPanels((current) => ({
-        ...current,
-        diagnostics:
-          'The browser stopped this run because it took too long. Retry the compiler and check the program for an endless loop.',
-      }))
-      setActiveTab('diagnostics')
+      setTerminal({
+        action,
+        phase: 'error',
+        text: 'The browser stopped this run because it took too long. Retry the compiler and check the program for an endless loop.',
+        instructionCount: 0,
+      })
       setAnnouncement('Execution stopped because it took too long.')
     }, 8000)
   }
 
-  const moveResultFocus = (
-    event: KeyboardEvent<HTMLButtonElement>,
-    index: number,
-  ) => {
-    let nextIndex = index
-    if (event.key === 'ArrowRight') {
-      nextIndex = (index + 1) % tabs.length
-    } else if (event.key === 'ArrowLeft') {
-      nextIndex = (index - 1 + tabs.length) % tabs.length
-    } else if (event.key === 'Home') {
-      nextIndex = 0
-    } else if (event.key === 'End') {
-      nextIndex = tabs.length - 1
-    } else {
-      return
-    }
-
-    event.preventDefault()
-    const nextTab = tabs[nextIndex]
-    setActiveTab(nextTab)
-    document.getElementById(`result-tab-${nextTab}`)?.focus()
-  }
-
   const statusClass = isWorking ? 'working' : compilerStatus
-  const displayedResult = panels[activeTab] || emptyPanelCopy[activeTab]
+  const terminalTitle = terminal.action
+    ? terminalTitles[terminal.action]
+    : 'Terminal'
   const lineCount = Math.max(source.split('\n').length, 1)
   const isModified = source !== selectedExample.source
 
   return (
     <div className="app-shell">
       <header className="topbar">
-        <div className="brand-mark" aria-hidden="true">
-          FS<span>++</span>
-        </div>
+        <img
+          className="brand-image"
+          src={`${import.meta.env.BASE_URL}framestepp.png`}
+          alt=""
+          aria-hidden="true"
+          width="48"
+          height="48"
+        />
         <div className="brand-copy">
           <h1>FrameStep++ Playground</h1>
           <p>Explore a typed language and its bytecode virtual machine.</p>
@@ -368,7 +371,19 @@ function App() {
               <p className="eyebrow">playground.frame</p>
               <h2 id="source-title">Source code</h2>
             </div>
-            {isModified && <span className="modified-badge">Modified</span>}
+            {isModified && (
+              <div className="editor-heading-actions">
+                <span className="modified-badge">Modified</span>
+                <button
+                  className="reset-button"
+                  type="button"
+                  disabled={isWorking}
+                  onClick={resetExample}
+                >
+                  Reset example
+                </button>
+              </div>
+            )}
           </div>
           <div className="code-editor">
             <div className="line-numbers" ref={gutterRef} aria-hidden="true">
@@ -380,8 +395,7 @@ function App() {
               value={source}
               onChange={(event) => {
                 setSource(event.target.value)
-                setPanels(makeEmptyPanels())
-                setInstructionCount(0)
+                setTerminal(makeIdleTerminal())
               }}
               onScroll={(event) => {
                 if (gutterRef.current) {
@@ -419,14 +433,6 @@ function App() {
             >
               View bytecode
             </button>
-            <button
-              className="reset-button"
-              type="button"
-              disabled={!isModified || isWorking}
-              onClick={resetExample}
-            >
-              Reset example
-            </button>
           </div>
           {compilerStatus === 'error' && (
             <div className="compiler-error" role="alert">
@@ -438,6 +444,30 @@ function App() {
               </button>
             </div>
           )}
+        </section>
+
+        <section
+          className="panel results-panel"
+          aria-labelledby="results-title"
+          aria-busy={terminal.phase === 'working'}
+        >
+          <div className="result-toolbar">
+            <div className="terminal-heading">
+              <p className="eyebrow">Compiler terminal</p>
+              <h2 id="results-title">{terminalTitle}</h2>
+            </div>
+            {terminal.instructionCount > 0 && (
+              <span className="instruction-count">
+                {terminal.instructionCount.toLocaleString()} instructions
+              </span>
+            )}
+          </div>
+          <div
+            className={`result-content ${terminal.phase !== 'idle' ? 'has-result' : ''} ${terminal.phase}`}
+            tabIndex={0}
+          >
+            <pre>{terminal.text}</pre>
+          </div>
         </section>
 
         <aside
@@ -468,52 +498,6 @@ function App() {
             original example back.
           </p>
         </aside>
-
-        <section className="panel results-panel" aria-labelledby="results-title">
-          <div className="result-toolbar">
-            <div
-              className="result-tabs"
-              role="tablist"
-              aria-label="Compiler results"
-            >
-              {tabs.map((tab, index) => (
-                <button
-                  id={`result-tab-${tab}`}
-                  key={tab}
-                  type="button"
-                  role="tab"
-                  aria-selected={activeTab === tab}
-                  aria-controls="compiler-result-panel"
-                  tabIndex={activeTab === tab ? 0 : -1}
-                  onClick={() => setActiveTab(tab)}
-                  onKeyDown={(event) => moveResultFocus(event, index)}
-                >
-                  {tabLabels[tab]}
-                  {panels[tab] && (
-                    <span className="tab-ready" aria-hidden="true" />
-                  )}
-                </button>
-              ))}
-            </div>
-            {instructionCount > 0 && (
-              <span className="instruction-count">
-                {instructionCount.toLocaleString()} instructions
-              </span>
-            )}
-          </div>
-          <h2 id="results-title" className="visually-hidden">
-            Compiler results
-          </h2>
-          <div
-            id="compiler-result-panel"
-            role="tabpanel"
-            aria-labelledby={`result-tab-${activeTab}`}
-            className={`result-content ${panels[activeTab] ? 'has-result' : ''}`}
-            tabIndex={0}
-          >
-            <pre>{displayedResult}</pre>
-          </div>
-        </section>
       </main>
 
       <div className="visually-hidden" aria-live="polite">

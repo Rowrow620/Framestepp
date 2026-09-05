@@ -11,39 +11,26 @@
 
 .topbar {
   display: grid;
-  grid-template-columns: auto 1fr auto auto;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 16px;
   min-height: 68px;
   margin-bottom: 14px;
   padding: 10px 14px;
   border: 1px solid var(--border);
-  border-radius: 12px;
-  background: rgba(13, 18, 26, 0.94);
-  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.28);
+  border-radius: 2px;
+  background: rgba(0, 5, 1, 0.97);
+  box-shadow:
+    0 0 28px rgba(57, 255, 20, 0.05),
+    inset 0 0 24px rgba(57, 255, 20, 0.018);
 }
 
-.brand-mark {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  border: 1px solid rgba(94, 234, 212, 0.42);
-  border-radius: 9px;
-  color: var(--text);
-  background: linear-gradient(
-    145deg,
-    rgba(94, 234, 212, 0.14),
-    rgba(130, 170, 255, 0.08)
-  );
-  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
-  font-size: 14px;
-  font-weight: 800;
-  letter-spacing: -0.04em;
-}
-
-.brand-mark span {
-  color: var(--accent);
+.brand-image {
+  display: block;
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  image-rendering: pixelated;
 }
 
 .brand-copy h1,
@@ -56,6 +43,7 @@
   font-size: 1.04rem;
   line-height: 1.25;
   letter-spacing: -0.015em;
+  text-shadow: 0 0 9px rgba(57, 255, 20, 0.32);
 }
 
 .brand-copy p {
@@ -71,7 +59,7 @@
   min-height: 34px;
   padding: 0 12px;
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: 2px;
   color: var(--muted);
   background: var(--panel-soft);
   font-size: 0.82rem;
@@ -87,7 +75,7 @@
 
 .compiler-status.ready .status-dot {
   background: var(--accent);
-  box-shadow: 0 0 12px rgba(94, 234, 212, 0.8);
+  box-shadow: 0 0 12px rgba(57, 255, 20, 0.8);
 }
 
 .compiler-status.working .status-dot,
@@ -107,7 +95,7 @@
   min-height: 36px;
   padding: 0 12px;
   border: 1px solid var(--border-strong);
-  border-radius: 8px;
+  border-radius: 2px;
   color: var(--text);
   background: var(--panel-raised);
   font-size: 0.84rem;
@@ -116,7 +104,8 @@
 }
 
 .repository-link:hover {
-  border-color: var(--blue);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .workspace {
@@ -133,9 +122,11 @@
   min-width: 0;
   overflow: hidden;
   border: 1px solid var(--border);
-  border-radius: 12px;
-  background: rgba(13, 18, 26, 0.96);
-  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.2);
+  border-radius: 2px;
+  background: rgba(2, 8, 3, 0.97);
+  box-shadow:
+    0 0 24px rgba(57, 255, 20, 0.035),
+    inset 0 0 32px rgba(57, 255, 20, 0.012);
 }
 
 .examples-panel {
@@ -197,7 +188,7 @@
   height: 26px;
   padding: 0 8px;
   border: 1px solid var(--border-strong);
-  border-radius: 7px;
+  border-radius: 2px;
   color: var(--muted);
   background: var(--panel-soft);
   font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -205,8 +196,14 @@
 }
 
 .modified-badge {
-  border-color: rgba(247, 200, 115, 0.35);
+  border-color: rgba(255, 230, 109, 0.42);
   color: var(--warning);
+}
+
+.editor-heading-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .example-list {
@@ -223,7 +220,7 @@
   width: 100%;
   padding: 11px 10px;
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: 2px;
   color: var(--muted);
   background: transparent;
   text-align: left;
@@ -232,11 +229,12 @@
 
 .example-option:hover:not(:disabled) {
   color: var(--text);
-  background: rgba(130, 170, 255, 0.06);
+  border-color: var(--border);
+  background: rgba(57, 255, 20, 0.045);
 }
 
 .example-option.selected {
-  border-color: rgba(94, 234, 212, 0.24);
+  border-color: rgba(57, 255, 20, 0.42);
   color: var(--text);
   background: var(--accent-soft);
 }
@@ -273,7 +271,7 @@
   margin: auto 10px 10px;
   padding: 13px;
   border: 1px solid var(--border);
-  border-radius: 9px;
+  border-radius: 2px;
   background: var(--panel-soft);
 }
 
@@ -303,15 +301,15 @@
   grid-template-columns: 46px minmax(0, 1fr);
   flex: 1;
   min-height: 360px;
-  background: #090e15;
+  background: #000;
 }
 
 .line-numbers {
   overflow: hidden;
   padding: 16px 10px 48px 0;
   border-right: 1px solid var(--border);
-  color: #718096;
-  background: #0b1017;
+  color: var(--faint);
+  background: #010502;
   font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
   font-size: 0.82rem;
   line-height: 1.62;
@@ -332,7 +330,7 @@
   border: 0;
   border-radius: 0;
   outline: none;
-  color: #d8e4f3;
+  color: var(--text);
   background: transparent;
   caret-color: var(--accent);
   font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -357,12 +355,11 @@
 }
 
 .action-button,
-.reset-button,
 .compiler-error button {
-  min-height: 36px;
-  padding: 0 12px;
-  border-radius: 7px;
-  font-size: 0.8rem;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 2px;
+  font-size: 0.84rem;
   font-weight: 700;
   cursor: pointer;
 }
@@ -374,17 +371,19 @@
 }
 
 .action-button:hover:not(:disabled) {
-  border-color: var(--blue);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .action-button.primary {
   border-color: var(--accent-strong);
-  color: #04110f;
+  color: #000;
   background: var(--accent);
 }
 
 .action-button.primary:hover:not(:disabled) {
-  background: #78f3df;
+  color: #000;
+  background: #72ff59;
 }
 
 .action-button:disabled,
@@ -393,15 +392,21 @@
 }
 
 .reset-button {
-  margin-left: auto;
-  border: 0;
-  color: var(--muted);
-  background: transparent;
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: 2px;
+  color: var(--text);
+  background: #000;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 .reset-button:hover:not(:disabled) {
-  color: var(--text);
-  background: var(--panel-raised);
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
 }
 
 .compiler-error {
@@ -424,7 +429,7 @@
 
 .example-summary {
   margin: 18px 16px 20px;
-  color: #c4d0e1;
+  color: var(--text);
   font-size: 0.91rem;
   line-height: 1.65;
 }
@@ -455,8 +460,8 @@
 .concept-list li {
   padding: 5px 8px;
   border: 1px solid var(--border);
-  border-radius: 6px;
-  color: #aebbd0;
+  border-radius: 2px;
+  color: var(--muted);
   background: var(--panel-soft);
   font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
   font-size: 0.75rem;
@@ -471,9 +476,9 @@
 .expected-block pre {
   padding: 11px 12px;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 2px;
   color: var(--accent);
-  background: #090e15;
+  background: #000;
   font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
   font-size: 0.78rem;
   line-height: 1.55;
@@ -492,56 +497,20 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 49px;
+  min-height: 60px;
+  padding: 10px 16px;
   border-bottom: 1px solid var(--border);
   background: var(--panel-soft);
 }
 
-.result-tabs {
-  display: flex;
-  align-self: stretch;
-}
-
-.result-tabs button {
-  position: relative;
-  min-width: 104px;
-  padding: 0 15px;
-  border: 0;
-  border-right: 1px solid var(--border);
-  color: var(--faint);
-  background: transparent;
-  font-size: 0.78rem;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.result-tabs button[aria-selected='true'] {
-  color: var(--text);
-  background: var(--panel);
-}
-
-.result-tabs button[aria-selected='true']::after {
-  position: absolute;
-  right: 14px;
-  bottom: -1px;
-  left: 14px;
-  height: 2px;
-  background: var(--accent);
-  content: "";
-}
-
-.tab-ready {
-  display: inline-block;
-  width: 5px;
-  height: 5px;
-  margin-left: 7px;
-  border-radius: 50%;
-  background: var(--accent);
-  vertical-align: middle;
+.terminal-heading h2 {
+  margin: 3px 0 0;
+  color: var(--accent);
+  font-size: 0.94rem;
+  text-shadow: 0 0 9px rgba(57, 255, 20, 0.28);
 }
 
 .instruction-count {
-  margin-right: 14px;
   color: var(--faint);
   font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
   font-size: 0.75rem;
@@ -553,17 +522,26 @@
   overflow: auto;
   padding: 16px 18px;
   color: var(--faint);
-  background: #090e15;
+  background: #000;
 }
 
 .result-content.has-result {
-  color: #d5e1f1;
+  color: var(--text);
+}
+
+.result-content.working {
+  color: var(--warning);
+}
+
+.result-content.error {
+  color: #ffb0bb;
 }
 
 .result-content pre {
   font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
-  font-size: 0.79rem;
+  font-size: 0.84rem;
   line-height: 1.55;
+  white-space: pre;
 }
 
 .visually-hidden {
@@ -600,8 +578,8 @@
     grid-template-columns: 210px minmax(0, 1fr);
     grid-template-areas:
       "examples editor"
-      "examples explanation"
-      "results results";
+      "examples results"
+      "explanation explanation";
   }
 
   .examples-panel {
@@ -615,8 +593,12 @@
   }
 
   .topbar {
-    grid-template-columns: auto 1fr;
+    grid-template-columns: auto minmax(0, 1fr);
     gap: 10px 12px;
+  }
+
+  .brand-copy {
+    grid-column: 2 / 3;
   }
 
   .compiler-status,
@@ -662,14 +644,8 @@
     min-height: 520px;
   }
 
-  .result-tabs {
-    width: 100%;
-  }
-
-  .result-tabs button {
-    flex: 1;
-    min-width: 0;
-    padding-inline: 8px;
+  .action-button {
+    flex: 1 1 150px;
   }
 
   .instruction-count {
@@ -678,9 +654,9 @@
 }
 
 @media (max-width: 480px) {
-  .brand-mark {
-    width: 38px;
-    height: 38px;
+  .brand-image {
+    width: 42px;
+    height: 42px;
   }
 
   .brand-copy h1 {
@@ -712,10 +688,17 @@
     display: none;
   }
 
-  .action-button,
-  .reset-button {
-    flex: 1 1 calc(50% - 8px);
-    margin-left: 0;
+  .editor-heading {
+    align-items: flex-start;
+  }
+
+  .editor-heading-actions {
+    flex-direction: column;
+    align-items: flex-end;
+  }
+
+  .action-button {
+    flex: 1 1 100%;
   }
 
   .line-numbers {
@@ -723,6 +706,12 @@
   }
 
   .code-editor {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 420px) {
+  .example-list {
     grid-template-columns: 1fr;
   }
 }

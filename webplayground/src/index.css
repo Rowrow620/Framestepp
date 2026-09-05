@@ -1,27 +1,25 @@
 :root {
   font-family:
-    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
-  color: #dce7f7;
-  background: #070a0f;
+    "Cascadia Code", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  color: #b7ffb7;
+  background: #000;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-  --page: #070a0f;
-  --panel: #0d121a;
-  --panel-raised: #111823;
-  --panel-soft: #0a0f16;
-  --border: #222e3f;
-  --border-strong: #33435a;
-  --text: #dce7f7;
-  --muted: #8b9ab0;
-  --faint: #74849a;
-  --accent: #5eead4;
-  --accent-strong: #2dd4bf;
-  --accent-soft: rgba(94, 234, 212, 0.1);
-  --blue: #82aaff;
-  --warning: #f7c873;
-  --danger: #ff7b8b;
+  --page: #000;
+  --panel: #020803;
+  --panel-raised: #061108;
+  --panel-soft: #010502;
+  --border: #153d1b;
+  --border-strong: #267a35;
+  --text: #b7ffb7;
+  --muted: #82cf8b;
+  --faint: #63a96c;
+  --accent: #39ff14;
+  --accent-strong: #23d90a;
+  --accent-soft: rgba(57, 255, 20, 0.09);
+  --warning: #ffe66d;
+  --danger: #ff667d;
   color-scheme: dark;
 }
 
@@ -39,10 +37,23 @@ body {
   min-height: 100vh;
   margin: 0;
   background:
-    linear-gradient(rgba(130, 170, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(130, 170, 255, 0.025) 1px, transparent 1px),
+    radial-gradient(circle at 50% -20%, rgba(57, 255, 20, 0.09), transparent 46%),
     var(--page);
-  background-size: 32px 32px;
+}
+
+body::before {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 3px,
+    rgba(57, 255, 20, 0.025) 3px,
+    rgba(57, 255, 20, 0.025) 4px
+  );
+  content: "";
 }
 
 button,
@@ -58,7 +69,7 @@ a {
 button:focus-visible,
 a:focus-visible,
 textarea:focus-visible,
-[role='tabpanel']:focus-visible {
+.result-content:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
@@ -68,6 +79,6 @@ button:disabled {
 }
 
 ::selection {
-  color: #06110f;
+  color: #000;
   background: var(--accent);
 }
