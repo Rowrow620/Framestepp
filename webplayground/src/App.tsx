@@ -324,6 +324,12 @@ function App() {
     transmission.target === terminal.text
 
   useEffect(() => {
+    if (transmission.active) {
+      resultContentRef.current?.focus({ preventScroll: true })
+    }
+  }, [transmission.active])
+
+  useEffect(() => {
     if (!isTransmissionVisible || !resultContentRef.current) {
       return
     }
